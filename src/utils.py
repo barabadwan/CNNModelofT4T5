@@ -50,19 +50,20 @@ def plotAccuracyLoss(hist, save_folder):
     loss =  hist.history['loss']
     val_loss = hist.history['val_loss']
     epochs = range(len(acc))
+
     fig = plt.figure()
     plt.plot(epochs, acc, 'r')
     plt.plot(epochs, val_acc, 'b')
     plt.legend(['Training Accuracy', 'Validation Accuracy'])
     plt.title(f'Training and validation accuracy for {modelName}')
-    fig.savefig(save_folder+'/Training and validation accuracy for '+modelName)
+    fig.savefig(save_folder+'/Training and validation accuracy for '+modelName+'.pdf')
 
-    fig = plt.figure
+    fig = plt.figure()
     plt.plot(epochs, loss, 'r')
     plt.plot(epochs, val_loss, 'b')
     plt.legend(['Training Loss', 'Validation Loss'])
     plt.title(f'Training and validation loss for model {modelName}')
-    fig.savefig(save_folder + '/Training and validation loss for ' + modelName)
+    fig.savefig(save_folder + '/Training and validation loss for ' + modelName+'.pdf')
 
 def getPlotLayerWeights(model, save_folder):
     weights = []
@@ -76,7 +77,7 @@ def getPlotLayerWeights(model, save_folder):
             for f in range(fs):
                 plt.subplot(1, fs, f+1)
                 plt.imshow(layer_weights[0][:,:,0,f], extent=[np.min(layer_weights[0][:,:,0,f]), np.max(layer_weights[0][:,:,0,f]), np.min(layer_weights[0][:,:,0,f]), np.max(layer_weights[0][:,:,0,f])])
-                fig.savefig(save_folder +'/Filters for '+ model.name)
+                fig.savefig(save_folder +'/Filters for '+ model.name+'.pdf')
 
     return weights
 

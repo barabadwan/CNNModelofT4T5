@@ -38,7 +38,7 @@ filter_space = 15  # degrees
 sum_over_space = [False]
 num_filt = 2
 binarize = True
-epochs = 5
+epochs = 50
 batch_size = 128
 learningRate = 0.01
 learningDecay = 0
@@ -66,43 +66,55 @@ accCallback = accuracyThreshCallback()
 # Define models
 ######
 
-model = ln_model(input_shape=(size_t, size_x, n_c),
+LNModel = ln_model(input_shape=(size_t, size_x, n_c),
                      filter_shape=[filter_indicies_t, filter_indicies_x],
                      num_filter=num_filt,
                      sum_over_space=sum_over_space,
                      binarize = binarize)
 
-# model = lnPool_model(input_shape=(size_t, size_x, n_c),
-#                      filter_shape=[filter_indicies_t, filter_indicies_x],
-#                      num_filter=num_filt,
-#                      sum_over_space=sum_over_space,
-#                      binarize = binarize,
-#                      poolSize = (1,2))
+
+LNPoolModel = lnPool_model(input_shape=(size_t, size_x, n_c),
+                     filter_shape=[filter_indicies_t, filter_indicies_x],
+                     num_filter=num_filt,
+                     sum_over_space=sum_over_space,
+                     binarize = binarize,
+                     poolSize = (1,2))
+
+LNLNModel = lnln_model(input_shape=(size_t, size_x, n_c),
+                     filter_shape=[filter_indicies_t, filter_indicies_x],
+                     num_filter=num_filt,
+                     sum_over_space=sum_over_space,
+                     binarize = binarize)
+
 
 
 ######
 # Fit Models
 ######
-save_folder = data_set_folder+'/'+model.name + '/' + date_str + '/'
-os.makedirs(save_folder)
+def fitModel(model):
+    save_folder = data_set_folder+'/'+model.name + '/' + date_str + '/'
+    os.makedirs(save_folder)
 
 
-saveCallbackFolder, saveCallback = makeSaveCallback(save_folder)
+    saveCallbackFolder, saveCallback = makeSaveCallback(save_folder)
 
-adamOpt = optimizers.Adam(lr= learningRate, decay=learningDecay)
+    adamOpt = optimizers.Adam(lr= learningRate, decay=learningDecay)
 
-model.compile(optimizer=adamOpt, loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=adamOpt, loss='binary_crossentropy', metrics=['accuracy'])
 
-hist = model.fit(train_in, np.squeeze(train_out), verbose=2, epochs=epochs, batch_size=batch_size,
-                                     validation_data=(dev_in, np.squeeze(dev_out)), callbacks=[accCallback, saveCallback])
-
-hist.saveFolder = save_folder
+    hist = model.fit(train_in, np.squeeze(train_out), verbose=2, epochs=epochs, batch_size=batch_size,
+                                         validation_data=(dev_in, np.squeeze(dev_out)), callbacks=[accCallback, saveCallback])
+    getPlotLayerWeights(model, save_folder)
+    plotAccuracyLoss(hist, save_folder)
+    return
 
 ######
 # Plot Results
 ######
-getPlotLayerWeights(model, save_folder)
-plotAccuracyLoss(hist, save_folder)
+
+fitModel(LNModel)
+fitModel(LNPoolModel)
+fitModel(LNLNModel)
 # PlotLearningRateSch(hist)
 
 plt.show()
