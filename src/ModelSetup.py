@@ -4,7 +4,7 @@ import os
 from src.utils import *
 from src.defineModels import *
 from tensorflow.keras import optimizers
-
+import easygui
 ######
 # Set data paths
 ######
@@ -106,6 +106,15 @@ def fitModel(model):
                                          validation_data=(dev_in, np.squeeze(dev_out)), callbacks=[accCallback, saveCallback])
     getPlotLayerWeights(model, save_folder)
     plotAccuracyLoss(hist, save_folder)
+    return
+
+
+
+###
+# Load models
+def loadModel():
+    path = easygui.diropenbox()
+    model = tf.keras.models.load_model(path)
     return
 
 ######
