@@ -43,37 +43,40 @@ def load_data_rr(path, binarize = True):
     return train_in, train_out, dev_in, dev_out, test_in, test_out, sample_freq, phase_step
 
 
-def plotAccuracyLoss(hist):
+def plotAccuracyLoss(hist, save_folder):
     modelName = hist.model.name
     acc = hist.history['accuracy']
     val_acc = hist.history['val_accuracy']
     loss =  hist.history['loss']
     val_loss = hist.history['val_loss']
     epochs = range(len(acc))
-    plt.figure()
+    fig = plt.figure()
     plt.plot(epochs, acc, 'r')
     plt.plot(epochs, val_acc, 'b')
     plt.legend(['Training Accuracy', 'Validation Accuracy'])
     plt.title(f'Training and validation accuracy for {modelName}')
-    plt.figure()
+    fig.savefig(save_folder+'/Training and validation accuracy for '+modelName)
+
+    fig = plt.figure
     plt.plot(epochs, loss, 'r')
     plt.plot(epochs, val_loss, 'b')
     plt.legend(['Training Loss', 'Validation Loss'])
     plt.title(f'Training and validation loss for model {modelName}')
-print('end')
+    fig.savefig(save_folder + '/Training and validation loss for ' + modelName)
 
-def getPlotLayerWeights(model):
+def getPlotLayerWeights(model, save_folder):
     weights = []
     for layer in model.layers[:-1]:
         if layer.get_weights():
             weights.append(layer.get_weights())
-            plt.figure()
+            fig = plt.figure()
             layer_weights = layer.get_weights()
             T, X, n, fs = layer_weights[0].shape
             plt.title(layer.name)
             for f in range(fs):
                 plt.subplot(1, fs, f+1)
-                plt.imshow(layer_weights[0][:,:,0,f])
+                plt.imshow(layer_weights[0][:,:,0,f], extent=[np.min(layer_weights[0][:,:,0,f]), np.max(layer_weights[0][:,:,0,f]), np.min(layer_weights[0][:,:,0,f]), np.max(layer_weights[0][:,:,0,f])])
+                fig.savefig(save_folder +'/Filters for '+ model.name)
 
     return weights
 
@@ -85,11 +88,11 @@ def PlotLearningRateSch(history):
     return optimal_lr
 
 def makeSaveCallback(filename):
-    checkpoint_path = filename[:-3]
+    checkpoint_path = filename
     checkpoint_filepath = checkpoint_path+"/cp.ckpt"
     # Create a callback that saves the model's weights
     cp_callback = tensorflow.keras.callbacks.ModelCheckpoint(filepath=checkpoint_filepath,
-                                                     save_weights_only=True,
+                                                     save_weights_only=False,
                                                      verbose=1)
     return checkpoint_filepath, cp_callback
 
