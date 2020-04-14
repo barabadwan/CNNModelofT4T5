@@ -40,7 +40,7 @@ num_filt = 2
 binarize = True
 epochs = 50
 batch_size = 128
-learningRate = 0.01
+learningRate = 0.1
 learningDecay = 0
 
 ######
@@ -86,6 +86,12 @@ LNLNModel = lnln_model(input_shape=(size_t, size_x, n_c),
                      sum_over_space=sum_over_space,
                      binarize = binarize)
 
+conductanceModel = conductance_model(input_shape=(size_t, size_x, n_c),
+                     filter_shape=[filter_indicies_t, filter_indicies_x],
+                     num_filter=num_filt,
+                     sum_over_space=sum_over_space,
+                     binarize = binarize) # worth pointing out, the spatial filter size is reset in the model
+
 
 
 ######
@@ -106,6 +112,7 @@ def fitModel(model):
                                          validation_data=(dev_in, np.squeeze(dev_out)), callbacks=[accCallback, saveCallback])
     getPlotLayerWeights(model, save_folder)
     plotAccuracyLoss(hist, save_folder)
+
     return
 
 
@@ -121,9 +128,11 @@ def loadModel():
 # Plot Results
 ######
 
-fitModel(LNModel)
-fitModel(LNPoolModel)
+# fitModel(LNModel)
+# fitModel(LNPoolModel)
+fitModel(conductanceModel)
 fitModel(LNLNModel)
+
 # PlotLearningRateSch(hist)
 
 plt.show()

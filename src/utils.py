@@ -67,17 +67,41 @@ def plotAccuracyLoss(hist, save_folder):
 
 def getPlotLayerWeights(model, save_folder):
     weights = []
+    combFirstFilter = []
+    combSecondFilter = []
+    spatialDeg = 0
     for layer in model.layers[:-1]:
         if layer.get_weights():
             weights.append(layer.get_weights())
-            fig = plt.figure()
             layer_weights = layer.get_weights()
             T, X, n, fs = layer_weights[0].shape
-            plt.title(layer.name)
-            for f in range(fs):
-                plt.subplot(1, fs, f+1)
-                plt.imshow(layer_weights[0][:,:,0,f], extent=[np.min(layer_weights[0][:,:,0,f]), np.max(layer_weights[0][:,:,0,f]), np.min(layer_weights[0][:,:,0,f]), np.max(layer_weights[0][:,:,0,f])])
-                fig.savefig(save_folder +'/Filters for '+ model.name+'.pdf')
+            if X == 3:
+                fig = plt.figure()
+                plt.title(layer.name)
+                for f in range(fs):
+                    # TODO Add layer names to each figure
+                    # TODO Add correct axis to time axis weights
+                    plt.subplot(1, fs, f+1)
+                    plt.suptitle(f'Filters for layer {layer.name} for {model.name}')
+                    plt.imshow(np.flipud(layer_weights[0][:,:,0,f]), cmap = 'RdBu', extent = [0, 15, 300, 0])
+                    fig.savefig(save_folder +'/Filters for '+ model.name+'.pdf')
+            else:
+                firstFilter  = np.squeeze(np.squeeze(layer_weights[0][:, :, :, 0]))
+                secondFilter = np.squeeze(np.squeeze(layer_weights[0][:, :, :, 1]))
+
+                combFirstFilter.append(firstFilter)
+                combSecondFilter.append(secondFilter)
+
+                xx,tt = np.shape(combSecondFilter)
+                if xx == 3:
+                    fig = plt.figure()
+                    plt.subplot(1, 2, 1)
+                    plt.suptitle(f'Filters for combined layers of the {model.name}')
+                    plt.imshow(np.transpose(combFirstFilter), cmap = 'RdBu', extent = [0, 15, 300, 0])
+                    plt.subplot(1, 2, 2)
+                    plt.imshow(np.transpose(combSecondFilter), cmap = 'RdBu', extent = [0, 15, 300, 0])
+                    fig.savefig(save_folder +'/Filters for '+ model.name+'.pdf')
+                    break
 
     return weights
 
